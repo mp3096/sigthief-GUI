@@ -1,12 +1,11 @@
 import tkinter as tk
-from tkinter import filedialog
-from tkinter import messagebox
+from tkinter import filedialog, messagebox
 import os
 import struct
 import shutil
 import io
-#t
-def gather_file_info_win(binary):
+
+def gather_file_info(binary):
     flItms = {}
     binary = open(binary, 'rb')
     binary.seek(int('3C', 16))
@@ -27,16 +26,15 @@ def gather_file_info_win(binary):
     # End of COFF
     flItms['OptionalHeader_start'] = flItms['COFF_Start'] + 20
 
-    #if flItms['SizeOfOptionalHeader']:
-        #Begin Standard Fields section of Optional Header
+    # if flItms['SizeOfOptionalHeader']:
+    # Begin Standard Fields section of Optional Header
     binary.seek(flItms['OptionalHeader_start'])
     flItms['Magic'] = struct.unpack('<H', binary.read(2))[0]
     flItms['MajorLinkerVersion'] = struct.unpack("!B", binary.read(1))[0]
     flItms['MinorLinkerVersion'] = struct.unpack("!B", binary.read(1))[0]
     flItms['SizeOfCode'] = struct.unpack("<I", binary.read(4))[0]
     flItms['SizeOfInitializedData'] = struct.unpack("<I", binary.read(4))[0]
-    flItms['SizeOfUninitializedData'] = struct.unpack("<I",
-                                                           binary.read(4))[0]
+    flItms['SizeOfUninitializedData'] = struct.unpack("<I", binary.read(4))[0]
     flItms['AddressOfEntryPoint'] = struct.unpack('<I', binary.read(4))[0]
     flItms['PatchLocation'] = flItms['AddressOfEntryPoint']
     flItms['BaseOfCode'] = struct.unpack('<I', binary.read(4))[0]
@@ -50,10 +48,8 @@ def gather_file_info_win(binary):
         flItms['ImageBase'] = struct.unpack('<I', binary.read(4))[0]
     flItms['SectionAlignment'] = struct.unpack('<I', binary.read(4))[0]
     flItms['FileAlignment'] = struct.unpack('<I', binary.read(4))[0]
-    flItms['MajorOperatingSystemVersion'] = struct.unpack('<H',
-                                                               binary.read(2))[0]
-    flItms['MinorOperatingSystemVersion'] = struct.unpack('<H',
-                                                               binary.read(2))[0]
+    flItms['MajorOperatingSystemVersion'] = struct.unpack('<H', binary.read(2))[0]
+    flItms['MinorOperatingSystemVersion'] = struct.unpack('<H', binary.read(2))[0]
     flItms['MajorImageVersion'] = struct.unpack('<H', binary.read(2))[0]
     flItms['MinorImageVersion'] = struct.unpack('<H', binary.read(2))[0]
     flItms['MajorSubsystemVersion'] = struct.unpack('<H', binary.read(2))[0]
@@ -83,7 +79,7 @@ def gather_file_info_win(binary):
     flItms['ExportTableRVA'] = struct.unpack('<I', binary.read(4))[0]
     flItms['ExportTableSize'] = struct.unpack('<I', binary.read(4))[0]
     flItms['ImportTableLOCInPEOptHdrs'] = binary.tell()
-    #ImportTable SIZE|LOC
+    # ImportTable SIZE|LOC
     flItms['ImportTableRVA'] = struct.unpack('<I', binary.read(4))[0]
     flItms['ImportTableSize'] = struct.unpack('<I', binary.read(4))[0]
     flItms['ResourceTable'] = struct.unpack('<Q', binary.read(8))[0]
@@ -95,7 +91,7 @@ def gather_file_info_win(binary):
     return flItms
 
 def copy_cert(exe):
-    flItms = gather_file_info_win(exe)
+    flItms = gather_file_info(exe)
     if flItms['CertLOC'] == 0 or flItms['CertSize'] == 0:
         raise ValueError("Input file is not signed!")
     with open(exe, 'rb') as f:
@@ -104,8 +100,8 @@ def copy_cert(exe):
     return cert
 
 def write_cert(cert, exe, output):
-    flItms = gather_file_info_win(exe)
-    if not output: 
+    flItms = gather_file_info(exe)
+    if not output:
         output = str(exe) + "_signed"
     shutil.copy2(exe, output)
     with open(exe, 'rb') as g:
@@ -119,7 +115,7 @@ def write_cert(cert, exe, output):
             f.write(cert)
 
 def truncate(exe, output):
-    flItms = gather_file_info_win(exe)
+    flItms = gather_file_info(exe)
     if flItms['CertLOC'] == 0 or flItms['CertSize'] == 0:
         raise ValueError("Input file is not signed!")
     if not output:
@@ -147,7 +143,7 @@ def output_cert(exe, output):
     messagebox.showinfo("Success", "Signature ripped. Output file: {}".format(output))
 
 def check_signature(exe):
-    flItms = gather_file_info_win(exe)
+    flItms = gather_file_info(exe)
     if flItms['CertLOC'] == 0 or flItms['CertSize'] == 0:
         messagebox.showinfo("Information", "Input file is not signed!")
     else:
@@ -158,48 +154,57 @@ class SigThiefGUI:
         self.master = master
         master.title("Signature Thief")
 
+        self.dll_or_exe_var = tk.StringVar(master, "exe")
+
+        # Radio buttons for selecting DLL or EXE
+        self.dll_radio = tk.Radiobutton(master, text="DLL", variable=self.dll_or_exe_var, value="dll")
+        self.dll_radio.grid(row=0, column=0)
+
+        self.exe_radio = tk.Radiobutton(master, text="EXE", variable=self.dll_or_exe_var, value="exe")
+        self.exe_radio.grid(row=0, column=1)
+
         # Input File
         self.input_label = tk.Label(master, text="Input File:")
-        self.input_label.grid(row=0, column=0, sticky=tk.W)
+        self.input_label.grid(row=1, column=0, sticky=tk.W)
 
         self.input_entry = tk.Entry(master, width=50)
-        self.input_entry.grid(row=0, column=1)
+        self.input_entry.grid(row=1, column=1)
 
         self.browse_input_button = tk.Button(master, text="Browse", command=self.browse_input)
-        self.browse_input_button.grid(row=0, column=2)
+        self.browse_input_button.grid(row=1, column=2)
 
         # Target File
         self.target_label = tk.Label(master, text="Target File:")
-        self.target_label.grid(row=1, column=0, sticky=tk.W)
+        self.target_label.grid(row=2, column=0, sticky=tk.W)
 
         self.target_entry = tk.Entry(master, width=50)
-        self.target_entry.grid(row=1, column=1)
+        self.target_entry.grid(row=2, column=1)
 
         self.browse_target_button = tk.Button(master, text="Browse", command=self.browse_target)
-        self.browse_target_button.grid(row=1, column=2)
+        self.browse_target_button.grid(row=2, column=2)
 
         # Output File
         self.output_label = tk.Label(master, text="Output File:")
-        self.output_label.grid(row=2, column=0, sticky=tk.W)
+        self.output_label.grid(row=3, column=0, sticky=tk.W)
 
         self.output_entry = tk.Entry(master, width=50)
-        self.output_entry.grid(row=2, column=1)
+        self.output_entry.grid(row=3, column=1)
 
         self.browse_output_button = tk.Button(master, text="Browse", command=self.browse_output)
-        self.browse_output_button.grid(row=2, column=2)
+        self.browse_output_button.grid(row=3, column=2)
 
         # Buttons
         self.add_button = tk.Button(master, text="Add Signature", command=self.add_signature)
-        self.add_button.grid(row=3, column=0)
+        self.add_button.grid(row=4, column=0)
 
         self.output_button = tk.Button(master, text="Output Signature", command=self.output_signature)
-        self.output_button.grid(row=3, column=1)
+        self.output_button.grid(row=4, column=1)
 
         self.check_button = tk.Button(master, text="Check Signature", command=self.check_signature)
-        self.check_button.grid(row=3, column=2)
+        self.check_button.grid(row=4, column=2)
 
         self.truncate_button = tk.Button(master, text="Truncate Signature", command=self.truncate_signature)
-        self.truncate_button.grid(row=3, column=3)
+        self.truncate_button.grid(row=4, column=3)
 
     def browse_input(self):
         filename = filedialog.askopenfilename(initialdir=os.getcwd(), title="Select Input File")
