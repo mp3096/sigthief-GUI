@@ -5,7 +5,7 @@ import os
 import struct
 import shutil
 import io
-
+#t
 def gather_file_info_win(binary):
     flItms = {}
     binary = open(binary, 'rb')
