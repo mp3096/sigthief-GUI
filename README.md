@@ -1,2 +1,2 @@
 # sigthief-GUI
-Gui version of Sigthief
+Gui version of Sigthief work in progress.
