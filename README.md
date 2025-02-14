@@ -45,12 +45,11 @@ The graphical user interface, built with Tkinter, provides a user-friendly metho
 1. **Clone the Repository:**
 
    ```bash
-   git clone https://github.com/yourusername/signature-thief-gui.git
-   cd signature-thief-gui
-
-   Run the Application:
+   git clone https://github.com/mp3096/sigthief-GUI
+   cd sigthief-GUI
 
 2. Simply execute the main script:
+   ```bash
    python main.py
 
 This will launch the GUI.
@@ -63,7 +62,7 @@ Select Operation Mode:
 Choose whether your target file is an EXE or DLL by selecting the appropriate radio button.
 
 File Selection:
-
+```bash
 Input File: Browse and select the file from which the signature will be ripped or checked.
 Target File: (Only for adding a signature) Browse and select the file to which the signature will be appended.
 Output File: Specify where the resulting file should be saved.
