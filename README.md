@@ -1,7 +1,7 @@
 # Signature Thief GUI
 
 _For security professionals only..._
-
+![Image](https://github.com/user-attachments/assets/d1ab9980-5aed-4cc2-b494-213f80574171)
 ## What is this?
 
 Over the years, testing against various Anti-Virus solutions has revealed that each product handles PE (Portable Executable) signatures differently. Some vendors prioritize certain certificate authorities without verifying the signature’s validity, while others simply check that the certificate table is populated. This disparity can lead to unexpected behavior during testing.
