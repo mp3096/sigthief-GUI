@@ -31,9 +31,10 @@ The graphical user interface, built with Tkinter, provides a user-friendly metho
 - **Signature Appending:** Append a ripped signature to another binary while updating the certificate table.
 - **Signature Truncation:** Remove an existing signature from a binary.
 - **Signature Check:** Quickly verify whether a file contains a digital signature.
+- 
+![Image](https://github.com/user-attachments/assets/d1ab9980-5aed-4cc2-b494-213f80574171)
 
 ## Getting Started
-
 ### Prerequisites
 
 - Python 3.x
